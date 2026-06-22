@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>首页 - 企业点评</title>
+<title>最新评价 - 企业点评</title>
 <meta name="description" content="查看真实员工对企业的评价，了解公司待遇、工作环境和发展前景">
 <style>*,::before,::after{box-sizing:border-box;margin:0;padding:0}
 :root{--blue:#1A56DB;--blue-light:#1A56DB10;--blue-dark:#1550C8}
@@ -113,28 +113,71 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
     <a href="index.html" class="logo">
       <div class="logo-icon">评</div>企业点评
     </a>
-    <nav class="nav"><a href="index.html" class=active>首页</a><a href="search.html">企业搜索</a><a href="reviews.html">最新评价</a><a href="complaint.html">企业申诉</a></nav>
+    <nav class="nav"><a href="index.html">首页</a><a href="search.html">企业搜索</a><a href="reviews.html" class=active>最新评价</a><a href="complaint.html">企业申诉</a></nav>
   </div>
 </header>
 <main class="container">
-<div class="hero">
-  <h1>企业点评平台</h1>
-  <p>查看真实员工评价，了解公司真实情况</p>
-  <form action="search.html" method="get" class="search-box">
-    <input type="text" name="q" placeholder="输入企业名称，查看真实评价...">
-    <button type="submit" class="btn btn-primary">搜索</button>
-  </form>
-  <div class="stats">
-    <div class="stat-item"><div class="stat-num">11,725</div><div class="stat-label">收录企业</div></div>
-    <div class="stat-item"><div class="stat-num">11,725</div><div class="stat-label">真实评价</div></div>
-    <div class="stat-item"><div class="stat-num">13+</div><div class="stat-label">覆盖城市</div></div>
-  </div>
+<div class="page">
+  <h1 class="page-title">最新评价</h1>
+  <p class="page-subtitle">加载中...</p>
+  <div id="reviewsContainer" class="loading"><div class="spinner"></div><p>正在加载评价数据...</p></div>
 </div>
-<div class="card" style="text-align:center;margin-top:20px">
-  <h3 style="font-size:18px;margin-bottom:8px">快速搜索</h3>
-  <p style="color:#64748b;font-size:14px;margin-bottom:16px">输入企业名称，立即查看员工真实评价</p>
-  <a href="search.html" class="btn btn-primary">开始搜索</a>
-</div>
+<script>
+(function(){
+  var base = location.pathname.replace(/reviews\.html.*$/, '');
+  fetch(base + 'data/reviews.json').then(function(r){return r.json()}).then(function(reviewsMap){
+    var allReviews = [];
+    var keys = Object.keys(reviewsMap);
+    for (var i = 0; i < keys.length; i++) {
+      var entry = reviewsMap[keys[i]];
+      if (entry.reviews) {
+        for (var j = 0; j < entry.reviews.length; j++) {
+          var r = entry.reviews[j];
+          allReviews.push({
+            content: r.content || '',
+            tags: r.tags || [],
+            city: r.city || '',
+            sourceCount: r.sourceCount || 1,
+            companyName: entry.companyName || '',
+            companySlug: entry.slug || ''
+          });
+        }
+      }
+    }
+    allReviews.sort(function(a,b){return (b.sourceCount||0) - (a.sourceCount||0)});
+    var recent = allReviews.slice(0, 50);
+    document.querySelector('.page-subtitle').textContent = '共 ' + allReviews.length.toLocaleString() + ' 条真实评价';
+    var h = '';
+    if (recent.length === 0) {
+      h = '<div class="empty"><p>暂无评价</p></div>';
+    } else {
+      for (var i = 0; i < recent.length; i++) {
+        var r = recent[i];
+        h += '<a href="company.html?slug=' + encodeURIComponent(r.companySlug) + '" class="card review-card" style="display:block;text-decoration:none;color:inherit">';
+        h += '<div class="review-header"><div class="review-avatar">匿</div><div>';
+        h += '<div class="review-author">匿名用户</div>';
+        h += '<div class="review-meta">' + esc_js_wrapper(r.companyName) + ' · ' + esc_js_wrapper(r.city) + '</div>';
+        h += '</div></div>';
+        if (r.tags.length > 0) {
+          h += '<div class="review-tags">';
+          for (var k = 0; k < r.tags.length; k++) {
+            h += '<span class="tag tag-blue">' + esc_js_wrapper(r.tags[k]) + '</span>';
+          }
+          h += '</div>';
+        }
+        var content = r.content.slice(0, 200);
+        if (r.content.length > 200) content += '...';
+        h += '<div class="review-content">' + esc_js_wrapper(content) + '</div>';
+        h += '</a>';
+      }
+    }
+    document.getElementById('reviewsContainer').innerHTML = h;
+  }).catch(function(){
+    document.getElementById('reviewsContainer').innerHTML = '<div class="empty"><p>加载失败，请刷新重试</p></div>';
+  });
+  function esc_js_wrapper(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+})();
+</script>
 </main>
 <footer class="footer">
   <div class="container">

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>首页 - 企业点评</title>
+<title>企业详情 - 企业点评</title>
 <meta name="description" content="查看真实员工对企业的评价，了解公司待遇、工作环境和发展前景">
 <style>*,::before,::after{box-sizing:border-box;margin:0;padding:0}
 :root{--blue:#1A56DB;--blue-light:#1A56DB10;--blue-dark:#1550C8}
@@ -113,28 +113,85 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
     <a href="index.html" class="logo">
       <div class="logo-icon">评</div>企业点评
     </a>
-    <nav class="nav"><a href="index.html" class=active>首页</a><a href="search.html">企业搜索</a><a href="reviews.html">最新评价</a><a href="complaint.html">企业申诉</a></nav>
+    <nav class="nav"><a href="index.html">首页</a><a href="search.html" class=active>企业搜索</a><a href="reviews.html">最新评价</a><a href="complaint.html">企业申诉</a></nav>
   </div>
 </header>
 <main class="container">
-<div class="hero">
-  <h1>企业点评平台</h1>
-  <p>查看真实员工评价，了解公司真实情况</p>
-  <form action="search.html" method="get" class="search-box">
-    <input type="text" name="q" placeholder="输入企业名称，查看真实评价...">
-    <button type="submit" class="btn btn-primary">搜索</button>
-  </form>
-  <div class="stats">
-    <div class="stat-item"><div class="stat-num">11,725</div><div class="stat-label">收录企业</div></div>
-    <div class="stat-item"><div class="stat-num">11,725</div><div class="stat-label">真实评价</div></div>
-    <div class="stat-item"><div class="stat-num">13+</div><div class="stat-label">覆盖城市</div></div>
-  </div>
+<div class="page" id="companyPage">
+  <a href="search.html" class="back-link">← 返回搜索</a>
+  <div class="loading"><div class="spinner"></div><p>加载中...</p></div>
 </div>
-<div class="card" style="text-align:center;margin-top:20px">
-  <h3 style="font-size:18px;margin-bottom:8px">快速搜索</h3>
-  <p style="color:#64748b;font-size:14px;margin-bottom:16px">输入企业名称，立即查看员工真实评价</p>
-  <a href="search.html" class="btn btn-primary">开始搜索</a>
-</div>
+<script>
+(function(){
+  var slug = new URLSearchParams(location.search).get('slug');
+  if (!slug) {
+    document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>请指定企业名称</h2><p>请从搜索页面选择一家企业</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
+    return;
+  }
+  var base = location.pathname.replace(/company\.html.*$/, '');
+  Promise.all([
+    fetch(base + 'data/companies.json').then(function(r){return r.json()}),
+    fetch(base + 'data/reviews.json').then(function(r){return r.json()})
+  ]).then(function(results){
+    var companies = results[0];
+    var reviewsMap = results[1];
+    var company = null;
+    for (var i = 0; i < companies.length; i++) {
+      if (companies[i].slug === slug) { company = companies[i]; break; }
+    }
+    if (!company) {
+      document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>企业不存在</h2><p>未找到该企业信息</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
+      return;
+    }
+    var entry = reviewsMap[company.id];
+    var reviewList = entry ? (entry.reviews || []) : [];
+    var h = '<a href="search.html" class="back-link">← 返回搜索</a>';
+    h += '<div class="sidebar-layout"><div>';
+    h += '<div class="card detail-header">';
+    h += '<div class="detail-avatar">' + esc(company.name.charAt(0)) + '</div>';
+    h += '<div><div class="detail-title">' + esc(company.name) + '</div>';
+    h += '<div class="detail-subtitle">';
+    if (company.city) h += '<span class="tag tag-gray">' + esc(company.city) + '</span>';
+    h += '<span class="badge badge-blue">' + company.reviewCount + ' 条评价</span>';
+    h += '</div></div></div>';
+    h += '<div class="compliance-note">以上评价均为用户个人观点，不代表本平台立场。本平台仅提供信息展示服务，不对评价内容的真实性、准确性负责。</div>';
+    h += '<h2 style="font-size:18px;font-weight:700;margin-bottom:16px">员工评价（共 ' + reviewList.length + ' 条）</h2>';
+    if (reviewList.length === 0) {
+      h += '<div class="card" style="text-align:center;padding:40px"><p style="color:#94a3b8">暂无评价</p></div>';
+    } else {
+      for (var j = 0; j < reviewList.length; j++) {
+        var r = reviewList[j];
+        h += '<div class="card review-card">';
+        h += '<div class="review-header"><div class="review-avatar">匿</div><div>';
+        h += '<div class="review-author">匿名用户</div>';
+        h += '<div class="review-meta">' + esc(r.city || company.city || '') + ' · 来源数 ' + (r.sourceCount || 1) + '</div>';
+        h += '</div></div>';
+        if (r.tags && r.tags.length > 0) {
+          h += '<div class="review-tags">';
+          for (var k = 0; k < r.tags.length; k++) {
+            h += '<span class="tag tag-blue">' + esc(r.tags[k]) + '</span>';
+          }
+          h += '</div>';
+        }
+        h += '<div class="review-content">' + esc(r.content || '') + '</div>';
+        if (r.issues) {
+          h += '<div class="review-issues"><div class="review-issues-title">主要问题</div><div class="review-issues-text">' + esc(r.issues) + '</div></div>';
+        }
+        h += '</div>';
+      }
+    }
+    h += '</div><div>';
+    h += '<div class="sidebar-card"><div class="sidebar-title">企业申诉</div><div class="sidebar-text">如果您是该企业负责人，可对不实评价进行申诉</div><a href="complaint.html" class="btn btn-outline btn-sm" style="width:100%;display:inline-flex">发起申诉</a></div>';
+    h += '<div class="sidebar-card"><div class="sidebar-title">企业信息</div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:#94a3b8">城市</span><span>' + esc(company.city || '-') + '</span></div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#94a3b8">评价数</span><span>' + company.reviewCount + ' 条</span></div>';
+    h += '</div></div></div>';
+    document.getElementById('companyPage').innerHTML = h;
+  }).catch(function(e){
+    document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>加载失败</h2><p>请刷新页面重试</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
+  });
+})();
+</script>
 </main>
 <footer class="footer">
   <div class="container">
