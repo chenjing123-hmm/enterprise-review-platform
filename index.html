@@ -140,7 +140,26 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
   </div>
 </header>
 
-<main id="app" class="container"><div class="loading"><div class="spinner"></div>加载中...</div></main>
+<main id="app" class="container">
+<div class="hero">
+  <h1>企业点评平台</h1>
+  <p>查看真实员工评价，了解公司真实情况</p>
+  <div class="search-box">
+    <input type="text" id="heroSearch" placeholder="输入企业名称，查看真实评价..." onkeydown="if(event.key==='Enter')navigate('#/search?q='+encodeURIComponent(this.value))">
+    <button class="btn btn-primary" onclick="navigate('#/search?q='+encodeURIComponent(document.getElementById('heroSearch').value))">搜索</button>
+  </div>
+  <div class="stats">
+    <div class="stat-item"><div class="stat-num">11,725</div><div class="stat-label">收录企业</div></div>
+    <div class="stat-item"><div class="stat-num">11,725</div><div class="stat-label">真实评价</div></div>
+    <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label">覆盖城市</div></div>
+  </div>
+</div>
+<div class="card" style="text-align:center;margin-top:20px">
+  <h3 style="font-size:18px;margin-bottom:8px">快速搜索</h3>
+  <p style="color:#64748b;font-size:14px;margin-bottom:16px">输入企业名称，立即查看员工真实评价</p>
+  <a href="#/search" class="btn btn-primary">开始搜索</a>
+</div>
+</main>
 
 <footer class="footer">
   <div class="container">
@@ -158,21 +177,47 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
 
 <script>
 const BASE = '/enterprise-review-platform';
-const DATA = { companies: null, reviews: null };
+const DATA = { companies: null, reviews: null, loading: { companies: false, reviews: false }, progress: 0 };
 
-// Data loading
+// Fetch with timeout
+function fetchWithTimeout(url, timeout = 30000) {
+  return Promise.race([
+    fetch(url),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
+  ]);
+}
+
+// Data loading - companies first, then reviews in background
 async function loadData() {
   if (DATA.companies) return;
-  try {
-    const [cRes, rRes] = await Promise.all([
-      fetch(`${BASE}/data/companies.json`),
-      fetch(`${BASE}/data/reviews.json`)
-    ]);
-    DATA.companies = await cRes.json();
-    DATA.reviews = await rRes.json();
-  } catch(e) {
-    console.error('Data load failed:', e);
+  if (DATA.loading.companies) {
+    return new Promise(resolve => {
+      const check = setInterval(() => { if (DATA.companies) { clearInterval(check); resolve(); } }, 100);
+    });
   }
+  DATA.loading.companies = true;
+  
+  try {
+    const cRes = await fetchWithTimeout(`${BASE}/data/companies.json`, 20000);
+    DATA.companies = await cRes.json();
+    DATA.progress = 50;
+  } catch(e) {
+    console.error('Companies load failed:', e);
+    DATA.companies = [];
+  }
+  DATA.loading.companies = false;
+  
+  // Load reviews in background
+  DATA.loading.reviews = true;
+  try {
+    const rRes = await fetchWithTimeout(`${BASE}/data/reviews.json`, 30000);
+    DATA.reviews = await rRes.json();
+    DATA.progress = 100;
+  } catch(e) {
+    console.error('Reviews load failed:', e);
+    DATA.reviews = {};
+  }
+  DATA.loading.reviews = false;
 }
 
 // Router
@@ -326,6 +371,7 @@ function renderCompany(app, params) {
   
   const entry = DATA.reviews ? DATA.reviews[company.id] : null;
   const reviewList = entry ? (entry.reviews || []) : [];
+  const reviewsLoading = DATA.loading.reviews && !DATA.reviews;
   
   let html = `<div class="page">
     <a href="#/search" class="back-link">← 返回搜索</a>
@@ -344,7 +390,9 @@ function renderCompany(app, params) {
         <div class="compliance-note">以上评价均为用户个人观点，不代表本平台立场。本平台仅提供信息展示服务，不对评价内容的真实性、准确性负责。</div>
         <h2 style="font-size:18px;font-weight:700;margin-bottom:16px">员工评价（共 ${reviewList.length} 条）</h2>`;
   
-  if (reviewList.length === 0) {
+  if (reviewsLoading) {
+    html += `<div class="loading"><div class="spinner"></div>评价数据加载中...</div>`;
+  } else if (reviewList.length === 0) {
     html += `<div class="card" style="text-align:center;padding:40px"><p style="color:#94a3b8">暂无评价</p></div>`;
   } else {
     reviewList.forEach(r => {
@@ -403,7 +451,9 @@ function renderReviews(app) {
     <h1 class="page-title">最新评价</h1>
     <p class="page-subtitle">共 ${allReviews.length.toLocaleString()} 条真实评价</p>`;
   
-  if (recent.length === 0) {
+  if (DATA.loading.reviews && !DATA.reviews) {
+    html += `<div class="loading"><div class="spinner"></div>评价数据加载中...</div>`;
+  } else if (recent.length === 0) {
     html += `<div class="empty"><p>暂无评价</p></div>`;
   } else {
     recent.forEach(r => {
