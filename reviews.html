@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>最新评价 - 企业点评</title>
-<meta name="description" content="查看真实员工对企业的评价，了解公司待遇、工作环境和发展前景">
 <style>*,::before,::after{box-sizing:border-box;margin:0;padding:0}
 :root{--blue:#1A56DB;--blue-light:#1A56DB10;--blue-dark:#1550C8}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC",sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;line-height:1.6}
@@ -103,81 +102,29 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
 .error-page{text-align:center;padding:80px 20px}
 .error-page h2{font-size:22px;color:#475569;margin-bottom:8px}
 .error-page p{color:#94a3b8;margin-bottom:16px}
+.progress-bar{width:100%;height:4px;background:#e2e8f0;border-radius:2px;overflow:hidden;margin:10px 0}
+.progress-bar-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
 </style>
-
 </head>
 <body>
 <div class="banner">以上评价均为用户个人观点，不代表本平台立场。本平台仅提供信息展示服务。</div>
 <header class="header">
   <div class="container header-inner">
-    <a href="index.html" class="logo">
-      <div class="logo-icon">评</div>企业点评
-    </a>
-    <nav class="nav"><a href="index.html">首页</a><a href="search.html">企业搜索</a><a href="reviews.html" class=active>最新评价</a><a href="complaint.html">企业申诉</a></nav>
+    <a href="index.html" class="logo"><div class="logo-icon">评</div>企业点评</a>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="search.html">企业搜索</a>
+      <a href="reviews.html" class="active">最新评价</a>
+      <a href="complaint.html">企业申诉</a>
+    </nav>
   </div>
 </header>
 <main class="container">
 <div class="page">
   <h1 class="page-title">最新评价</h1>
-  <p class="page-subtitle">加载中...</p>
-  <div id="reviewsContainer" class="loading"><div class="spinner"></div><p>正在加载评价数据...</p></div>
+  <p class="page-subtitle" id="reviewCount">加载中...</p>
+  <div id="reviewsContainer"><div class="loading"><div class="spinner"></div><p>评价加载中...</p></div></div>
 </div>
-<script>
-(function(){
-  var base = location.pathname.replace(/reviews\.html.*$/, '');
-  fetch(base + 'data/reviews.json').then(function(r){return r.json()}).then(function(reviewsMap){
-    var allReviews = [];
-    var keys = Object.keys(reviewsMap);
-    for (var i = 0; i < keys.length; i++) {
-      var entry = reviewsMap[keys[i]];
-      if (entry.reviews) {
-        for (var j = 0; j < entry.reviews.length; j++) {
-          var r = entry.reviews[j];
-          allReviews.push({
-            content: r.content || '',
-            tags: r.tags || [],
-            city: r.city || '',
-            sourceCount: r.sourceCount || 1,
-            companyName: entry.companyName || '',
-            companySlug: entry.slug || ''
-          });
-        }
-      }
-    }
-    allReviews.sort(function(a,b){return (b.sourceCount||0) - (a.sourceCount||0)});
-    var recent = allReviews.slice(0, 50);
-    document.querySelector('.page-subtitle').textContent = '共 ' + allReviews.length.toLocaleString() + ' 条真实评价';
-    var h = '';
-    if (recent.length === 0) {
-      h = '<div class="empty"><p>暂无评价</p></div>';
-    } else {
-      for (var i = 0; i < recent.length; i++) {
-        var r = recent[i];
-        h += '<a href="company.html?slug=' + encodeURIComponent(r.companySlug) + '" class="card review-card" style="display:block;text-decoration:none;color:inherit">';
-        h += '<div class="review-header"><div class="review-avatar">匿</div><div>';
-        h += '<div class="review-author">匿名用户</div>';
-        h += '<div class="review-meta">' + esc_js_wrapper(r.companyName) + ' · ' + esc_js_wrapper(r.city) + '</div>';
-        h += '</div></div>';
-        if (r.tags.length > 0) {
-          h += '<div class="review-tags">';
-          for (var k = 0; k < r.tags.length; k++) {
-            h += '<span class="tag tag-blue">' + esc_js_wrapper(r.tags[k]) + '</span>';
-          }
-          h += '</div>';
-        }
-        var content = r.content.slice(0, 200);
-        if (r.content.length > 200) content += '...';
-        h += '<div class="review-content">' + esc_js_wrapper(content) + '</div>';
-        h += '</a>';
-      }
-    }
-    document.getElementById('reviewsContainer').innerHTML = h;
-  }).catch(function(){
-    document.getElementById('reviewsContainer').innerHTML = '<div class="empty"><p>加载失败，请刷新重试</p></div>';
-  });
-  function esc_js_wrapper(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-})();
-</script>
 </main>
 <footer class="footer">
   <div class="container">
@@ -192,5 +139,85 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
     <p>企业点评平台 - 真实员工评价 | 仅供信息参考</p>
   </div>
 </footer>
+<script>
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+(function(){
+  var base = location.pathname.replace(/reviews\.html.*$/, '');
+  var reviewFiles = ["上海.json", "东莞.json", "佛山.json", "其他.json", "其他城市.json", "厦门.json", "宁波.json", "广州.json", "杭州.json", "深圳_a.json", "深圳_i.json", "深圳_k.json", "深圳_l.json", "深圳_m.json", "深圳_o.json", "深圳_t.json", "深圳_v.json", "深圳_一.json", "深圳_七.json", "深圳_万.json", "深圳_三.json", "深圳_上.json", "深圳_世.json", "深圳_东.json", "深圳_丝.json", "深圳_两.json", "深圳_中.json", "深圳_丰.json", "深圳_久.json", "深圳_义.json", "深圳_乐.json", "深圳_九.json", "深圳_买.json", "深圳_争.json", "深圳_云.json", "深圳_互.json", "深圳_五.json", "深圳_亚.json", "深圳_亿.json", "深圳_仲.json", "深圳_企.json", "深圳_伊.json", "深圳_众.json", "深圳_优.json", "深圳_传.json", "深圳_伯.json", "深圳_佛.json", "深圳_佰.json", "深圳_佳.json", "深圳_俊.json", "深圳_保.json", "深圳_信.json", "深圳_倍.json", "深圳_倾.json", "深圳_健.json", "深圳_傲.json", "深圳_元.json", "深圳_兆.json", "深圳_先.json", "深圳_克.json", "深圳_全.json", "深圳_六.json", "深圳_兰.json", "深圳_兴.json", "深圳_凌.json", "深圳_几.json", "深圳_凤.json", "深圳_凯.json", "深圳_创.json", "深圳_初.json", "深圳_利.json", "深圳_前.json", "深圳_力.json", "深圳_加.json", "深圳_动.json", "深圳_劲.json", "深圳_勤.json", "深圳_北.json", "深圳_千.json", "深圳_华.json", "深圳_协.json", "深圳_卓.json", "深圳_南.json", "深圳_博.json", "深圳_卡.json", "深圳_卧.json", "深圳_即.json", "深圳_原.json", "深圳_厦.json", "深圳_叁.json", "深圳_友.json", "深圳_双.json", "深圳_古.json", "深圳_台.json", "深圳_叹.json", "深圳_合.json", "深圳_吉.json", "深圳_同.json", "深圳_名.json", "深圳_君.json", "深圳_听.json", "深圳_启.json", "深圳_周.json", "深圳_和.json", "深圳_品.json", "深圳_哪.json", "深圳_唐.json", "深圳_唯.json", "深圳_喜.json", "深圳_嘉.json", "深圳_四.json", "深圳_困.json", "深圳_固.json", "深圳_国.json", "深圳_图.json", "深圳_圆.json", "深圳_圣.json", "深圳_地.json", "深圳_坦.json", "深圳_基.json", "深圳_塞.json", "深圳_壹.json", "深圳_多.json", "深圳_大.json", "深圳_天.json", "深圳_头.json", "深圳_奈.json", "深圳_奥.json", "深圳_好.json", "深圳_如.json", "深圳_妙.json", "深圳_威.json", "深圳_婕.json", "深圳_孕.json", "深圳_宁.json", "深圳_宇.json", "深圳_安.json", "深圳_宏.json", "深圳_宜.json", "深圳_宝.json", "深圳_宸.json", "深圳_宽.json", "深圳_富.json", "深圳_小.json", "深圳_尚.json", "深圳_尤.json", "深圳_尼.json", "深圳_山.json", "深圳_岑.json", "深圳_岩.json", "深圳_峰.json", "深圳_崛.json", "深圳_巨.json", "深圳_巴.json", "深圳_希.json", "深圳_常.json", "深圳_幸.json", "深圳_广.json", "深圳_库.json", "深圳_康.json", "深圳_开.json", "深圳_弗.json", "深圳_弘.json", "深圳_彩.json", "深圳_影.json", "深圳_彼.json", "深圳_征.json", "深圳_徐.json", "深圳_御.json", "深圳_微.json", "深圳_德.json", "深圳_心.json", "深圳_怎.json", "深圳_思.json", "深圳_恒.json", "深圳_恩.json", "深圳_悠.json", "深圳_惠.json", "深圳_愉.json", "深圳_意.json", "深圳_感.json", "深圳_慕.json", "深圳_慧.json", "深圳_懿.json", "深圳_戍.json", "深圳_戎.json", "深圳_成.json", "深圳_扉.json", "深圳_才.json", "深圳_扬.json", "深圳_承.json", "深圳_拓.json", "深圳_捷.json", "深圳_摩.json", "深圳_敏.json", "深圳_数.json", "深圳_文.json", "深圳_斯.json", "深圳_新.json", "深圳_方.json", "深圳_施.json", "深圳_无.json", "深圳_日.json", "深圳_旭.json", "深圳_时.json", "深圳_昂.json", "深圳_昊.json", "深圳_明.json", "深圳_易.json", "深圳_星.json", "深圳_春.json", "深圳_昶.json", "深圳_晋.json", "深圳_晟.json", "深圳_普.json", "深圳_景.json", "深圳_智.json", "深圳_暴.json", "深圳_最.json", "深圳_有.json", "深圳_朗.json", "深圳_木.json", "深圳_未.json", "深圳_本.json", "深圳_李.json", "深圳_杜.json", "深圳_来.json", "深圳_杭.json", "深圳_极.json", "深圳_柏.json", "深圳_柚.json", "深圳_柠.json", "深圳_柯.json", "深圳_栀.json", "深圳_树.json", "深圳_栖.json", "深圳_栗.json", "深圳_格.json", "深圳_桂.json", "深圳_桃.json", "深圳_桑.json", "深圳_桦.json", "深圳_梦.json", "深圳_梵.json", "深圳_森.json", "深圳_模.json", "深圳_欣.json", "深圳_欧.json", "深圳_正.json", "深圳_武.json", "深圳_比.json", "深圳_氦.json", "深圳_水.json", "深圳_汇.json", "深圳_汉.json", "深圳_汕.json", "深圳_江.json", "深圳_汤.json", "深圳_沃.json", "深圳_沈.json", "深圳_河.json", "深圳_泉.json", "深圳_泛.json", "深圳_波.json", "深圳_泰.json", "深圳_泽.json", "深圳_派.json", "深圳_浙.json", "深圳_浦.json", "深圳_海.json", "深圳_润.json", "深圳_淄.json", "深圳_淘.json", "深圳_深0.json", "深圳_深1.json", "深圳_深2.json", "深圳_深3.json", "深圳_深4.json", "深圳_深5.json", "深圳_深6.json", "深圳_深7.json", "深圳_深8.json", "深圳_深9.json", "深圳_深a.json", "深圳_深b.json", "深圳_深c.json", "深圳_深d.json", "深圳_深e.json", "深圳_深f.json", "深圳_添.json", "深圳_清.json", "深圳_温.json", "深圳_港.json", "深圳_渲.json", "深圳_渴.json", "深圳_游.json", "深圳_湖.json", "深圳_源.json", "深圳_潮.json", "深圳_澜.json", "深圳_瀚.json", "深圳_火.json", "深圳_灵.json", "深圳_炜.json", "深圳_烟.json", "深圳_焰.json", "深圳_熵.json", "深圳_爱.json", "深圳_物.json", "深圳_特.json", "深圳_猛.json", "深圳_玉.json", "深圳_王.json", "深圳_珂.json", "深圳_珑.json", "深圳_珠.json", "深圳_瑞.json", "深圳_瑾.json", "深圳_璐.json", "深圳_璞.json", "深圳_甄.json", "深圳_甚.json", "深圳_生.json", "深圳_甬.json", "深圳_由.json", "深圳_电.json", "深圳_画.json", "深圳_畅.json", "深圳_百.json", "深圳_皆.json", "深圳_盈.json", "深圳_益.json", "深圳_盛.json", "深圳_直.json", "深圳_真.json", "深圳_睿.json", "深圳_石.json", "深圳_破.json", "深圳_硕.json", "深圳_碧.json", "深圳_碳.json", "深圳_祥.json", "深圳_福.json", "深圳_禹.json", "深圳_禾.json", "深圳_科.json", "深圳_稀.json", "深圳_程.json", "深圳_稳.json", "深圳_立.json", "深圳_竑.json", "深圳_笑.json", "深圳_筋.json", "深圳_简.json", "深圳_米.json", "深圳_精.json", "深圳_糯.json", "深圳_索.json", "深圳_紫.json", "深圳_红.json", "深圳_纯.json", "深圳_纳.json", "深圳_纵.json", "深圳_纽.json", "深圳_细.json", "深圳_绍.json", "深圳_维.json", "深圳_绿.json", "深圳_网.json", "深圳_罗.json", "深圳_美.json", "深圳_羽.json", "深圳_羿.json", "深圳_翔.json", "深圳_翼.json", "深圳_聆.json", "深圳_联.json", "深圳_聚.json", "深圳_胜.json", "深圳_腾.json", "深圳_自.json", "深圳_至.json", "深圳_致.json", "深圳_艾.json", "深圳_芜.json", "深圳_芬.json", "深圳_芯.json", "深圳_花.json", "深圳_苏.json", "深圳_英.json", "深圳_范.json", "深圳_茵.json", "深圳_荣.json", "深圳_莫.json", "深圳_莱.json", "深圳_菲.json", "深圳_萃.json", "深圳_萤.json", "深圳_萨.json", "深圳_葫.json", "深圳_蒲.json", "深圳_蓝.json", "深圳_蔚.json", "深圳_薇.json", "深圳_虎.json", "深圳_蜂.json", "深圳_蜜.json", "深圳_蝶.json", "深圳_融.json", "深圳_行.json", "深圳_衍.json", "深圳_裕.json", "深圳_西.json", "深圳_触.json", "深圳_誉.json", "深圳_许.json", "深圳_诺.json", "深圳_谷.json", "深圳_象.json", "深圳_贝.json", "深圳_赛.json", "深圳_赢.json", "深圳_赣.json", "深圳_超.json", "深圳_越.json", "深圳_跨.json", "深圳_路.json", "深圳_轻.json", "深圳_载.json", "深圳_辛.json", "深圳_达.json", "深圳_迈.json", "深圳_这.json", "深圳_远.json", "深圳_迪.json", "深圳_迷.json", "深圳_追.json", "深圳_逊.json", "深圳_通.json", "深圳_速.json", "深圳_郑.json", "深圳_酷.json", "深圳_醒.json", "深圳_重.json", "深圳_量.json", "深圳_金.json", "深圳_鑫.json", "深圳_铂.json", "深圳_铉.json", "深圳_铠.json", "深圳_银.json", "深圳_锋.json", "深圳_锐.json", "深圳_锦.json", "深圳_长.json", "深圳_闪.json", "深圳_问.json", "深圳_阔.json", "深圳_阳.json", "深圳_阿.json", "深圳_际.json", "深圳_陕.json", "深圳_陶.json", "深圳_隐.json", "深圳_雅.json", "深圳_集.json", "深圳_雨.json", "深圳_零.json", "深圳_雷.json", "深圳_霖.json", "深圳_青.json", "深圳_革.json", "深圳_韦.json", "深圳_顺.json", "深圳_颂.json", "深圳_领.json", "深圳_颐.json", "深圳_风.json", "深圳_飞.json", "深圳_香.json", "深圳_馨.json", "深圳_马.json", "深圳_驰.json", "深圳_高.json", "深圳_魔.json", "深圳_鱼.json", "深圳_鲍.json", "深圳_鲜.json", "深圳_鲤.json", "深圳_鲲.json", "深圳_鸿.json", "深圳_鹏.json", "深圳_鹰.json", "深圳_鹿.json", "深圳_麦.json", "深圳_黎.json", "深圳_黑.json", "深圳_龙.json", "郑州.json", "金华.json", "长沙.json"];
+  var loaded = 0;
+  var total = reviewFiles.length;
+
+  function updateProgress() {
+    document.getElementById('reviewCount').textContent = '加载中... (' + loaded + '/' + total + ' 城市)';
+  }
+  updateProgress();
+
+  function loadCity(i) {
+    if (i >= reviewFiles.length) {
+      showResults();
+      return;
+    }
+    var city = reviewFiles[i];
+    fetch(base + 'data/reviews/' + encodeURIComponent(city) + '.json').then(function(r){return r.json()}).then(function(chunk){
+      var keys = Object.keys(chunk);
+      for (var j = 0; j < keys.length; j++) {
+        var entry = chunk[keys[j]];
+        if (entry.reviews) {
+          for (var k = 0; k < entry.reviews.length; k++) {
+            var r = entry.reviews[k];
+            allReviews.push({
+              content: r.content || '',
+              tags: r.tags || [],
+              city: r.city || '',
+              sourceCount: r.sourceCount || 1,
+              companyName: entry.companyName || '',
+              companySlug: entry.slug || ''
+            });
+          }
+        }
+      }
+      loaded++;
+      updateProgress();
+      loadCity(i + 1);
+    }).catch(function(){
+      loaded++;
+      updateProgress();
+      loadCity(i + 1);
+    });
+  }
+
+  function showResults() {
+    document.getElementById('reviewCount').textContent = '共 ' + allReviews.length.toLocaleString() + ' 条真实评价';
+    allReviews.sort(function(a,b){return (b.sourceCount||0) - (a.sourceCount||0)});
+    var recent = allReviews.slice(0, 50);
+    var h = '';
+    if (recent.length === 0) {
+      h = '<div class="empty"><p>暂无评价</p></div>';
+    } else {
+      for (var i = 0; i < recent.length; i++) {
+        var r = recent[i];
+        h += '<a href="company.html?slug=' + encodeURIComponent(r.companySlug) + '" class="card review-card" style="display:block;text-decoration:none;color:inherit">';
+        h += '<div class="review-header"><div class="review-avatar">匿</div><div>';
+        h += '<div class="review-author">匿名用户</div>';
+        h += '<div class="review-meta">' + esc(r.companyName) + ' · ' + esc(r.city) + '</div>';
+        h += '</div></div>';
+        if (r.tags.length > 0) {
+          h += '<div class="review-tags">';
+          for (var k = 0; k < r.tags.length; k++) h += '<span class="tag tag-blue">' + esc(r.tags[k]) + '</span>';
+          h += '</div>';
+        }
+        var content = r.content.slice(0, 200);
+        if (r.content.length > 200) content += '...';
+        h += '<div class="review-content">' + esc(content) + '</div>';
+        h += '</a>';
+      }
+    }
+    document.getElementById('reviewsContainer').innerHTML = h;
+  }
+
+  loadCity(0);
+})();
+</script>
 </body>
 </html>

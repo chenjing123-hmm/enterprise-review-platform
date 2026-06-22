@@ -1,8 +1,0 @@
-packages:
-  - "apps/*"
-  - "packages/*"
-allowBuilds:
-  '@nestjs/core': true
-  bcrypt: true
-  tesseract.js: true
-onlyBuiltDependencies: '@nestjs/core'
