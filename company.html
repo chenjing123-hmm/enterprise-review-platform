@@ -140,36 +140,29 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
       return;
     }
     renderCompanyHeader(company);
-    // Step 2: Load companies.json to get the reviewFile mapping
-    fetch(base + 'data/companies.json').then(function(r){return r.json()}).then(function(companies){
-      var fullCompany = null;
-      for (var i = 0; i < companies.length; i++) {
-        if (companies[i].slug === slug) { fullCompany = companies[i]; break; }
-      }
-      if (!fullCompany || !fullCompany.reviewFile) {
-        renderNoReviews();
-        return;
-      }
-      // Step 3: Load the specific review file
-      fetch(base + 'data/reviews/' + fullCompany.reviewFile + '.json').then(function(r){
-        if (!r.ok) throw new Error('not found');
-        return r.json();
-      }).then(function(chunk){
-        var entry = chunk[fullCompany.id];
+    // Step 2: Directly load reviews using the reviewFile from the index
+    var reviewFile = company.f || '';
+    if (!reviewFile || !company.i) {
+      renderNoReviews();
+      return;
+    }
+    // Step 3: Load the specific review file
+    fetch(base + 'data/reviews/' + reviewFile + '.json').then(function(r){
+      if (!r.ok) throw new Error('not found');
+      return r.json();
+    }).then(function(chunk){
+      var entry = chunk[company.i];
+      var reviewList = entry ? (entry.reviews || []) : [];
+      renderReviews(company, reviewList);
+    }).catch(function(){
+      // Fallback: try loading the full reviews.json
+      fetch(base + 'data/reviews.json').then(function(r){return r.json()}).then(function(allReviews){
+        var entry = allReviews[company.i];
         var reviewList = entry ? (entry.reviews || []) : [];
         renderReviews(company, reviewList);
       }).catch(function(){
-        // Fallback: try loading the full reviews.json
-        fetch(base + 'data/reviews.json').then(function(r){return r.json()}).then(function(allReviews){
-          var entry = allReviews[fullCompany.id];
-          var reviewList = entry ? (entry.reviews || []) : [];
-          renderReviews(company, reviewList);
-        }).catch(function(){
-          renderNoReviews();
-        });
+        renderNoReviews();
       });
-    }).catch(function(){
-      renderNoReviews();
     });
   }).catch(function(e){
     document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>加载失败</h2><p>请刷新页面重试</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
