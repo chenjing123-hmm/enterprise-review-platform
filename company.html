@@ -129,30 +129,83 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
     return;
   }
   var base = location.pathname.replace(/company\.html.*$/, '');
-  Promise.all([
-    fetch(base + 'data/companies.json').then(function(r){return r.json()}),
-    fetch(base + 'data/reviews.json').then(function(r){return r.json()})
-  ]).then(function(results){
-    var companies = results[0];
-    var reviewsMap = results[1];
+  // Step 1: Load search index to find company
+  fetch(base + 'data/search-index.json').then(function(r){return r.json()}).then(function(index){
     var company = null;
-    for (var i = 0; i < companies.length; i++) {
-      if (companies[i].slug === slug) { company = companies[i]; break; }
+    for (var i = 0; i < index.length; i++) {
+      if (index[i].s === slug) { company = index[i]; break; }
     }
     if (!company) {
       document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>企业不存在</h2><p>未找到该企业信息</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
       return;
     }
-    var entry = reviewsMap[company.id];
-    var reviewList = entry ? (entry.reviews || []) : [];
+    renderCompanyHeader(company);
+    // Step 2: Load companies.json to get the reviewFile mapping
+    fetch(base + 'data/companies.json').then(function(r){return r.json()}).then(function(companies){
+      var fullCompany = null;
+      for (var i = 0; i < companies.length; i++) {
+        if (companies[i].slug === slug) { fullCompany = companies[i]; break; }
+      }
+      if (!fullCompany || !fullCompany.reviewFile) {
+        renderNoReviews();
+        return;
+      }
+      // Step 3: Load the specific review file
+      fetch(base + 'data/reviews/' + fullCompany.reviewFile + '.json').then(function(r){
+        if (!r.ok) throw new Error('not found');
+        return r.json();
+      }).then(function(chunk){
+        var entry = chunk[fullCompany.id];
+        var reviewList = entry ? (entry.reviews || []) : [];
+        renderReviews(company, reviewList);
+      }).catch(function(){
+        // Fallback: try loading the full reviews.json
+        fetch(base + 'data/reviews.json').then(function(r){return r.json()}).then(function(allReviews){
+          var entry = allReviews[fullCompany.id];
+          var reviewList = entry ? (entry.reviews || []) : [];
+          renderReviews(company, reviewList);
+        }).catch(function(){
+          renderNoReviews();
+        });
+      });
+    }).catch(function(){
+      renderNoReviews();
+    });
+  }).catch(function(e){
+    document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>加载失败</h2><p>请刷新页面重试</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
+  });
+
+  function renderCompanyHeader(company) {
     var h = '<a href="search.html" class="back-link">← 返回搜索</a>';
     h += '<div class="sidebar-layout"><div>';
     h += '<div class="card detail-header">';
-    h += '<div class="detail-avatar">' + esc(company.name.charAt(0)) + '</div>';
-    h += '<div><div class="detail-title">' + esc(company.name) + '</div>';
+    h += '<div class="detail-avatar">' + esc(company.n.charAt(0)) + '</div>';
+    h += '<div><div class="detail-title">' + esc(company.n) + '</div>';
     h += '<div class="detail-subtitle">';
-    if (company.city) h += '<span class="tag tag-gray">' + esc(company.city) + '</span>';
-    h += '<span class="badge badge-blue">' + company.reviewCount + ' 条评价</span>';
+    if (company.c) h += '<span class="tag tag-gray">' + esc(company.c) + '</span>';
+    h += '<span class="badge badge-blue">' + company.r + ' 条评价</span>';
+    h += '</div></div></div>';
+    h += '<div class="compliance-note">以上评价均为用户个人观点，不代表本平台立场。本平台仅提供信息展示服务，不对评价内容的真实性、准确性负责。</div>';
+    h += '<h2 style="font-size:18px;font-weight:700;margin-bottom:16px">员工评价</h2>';
+    h += '<div class="loading"><div class="spinner"></div><p>评价加载中...</p></div>';
+    h += '</div><div>';
+    h += '<div class="sidebar-card"><div class="sidebar-title">企业申诉</div><div class="sidebar-text">如果您是该企业负责人，可对不实评价进行申诉</div><a href="complaint.html" class="btn btn-outline btn-sm" style="width:100%;display:inline-flex">发起申诉</a></div>';
+    h += '<div class="sidebar-card"><div class="sidebar-title">企业信息</div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:#94a3b8">城市</span><span>' + esc(company.c || '-') + '</span></div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#94a3b8">评价数</span><span>' + company.r + ' 条</span></div>';
+    h += '</div></div></div>';
+    document.getElementById('companyPage').innerHTML = h;
+  }
+
+  function renderReviews(company, reviewList) {
+    var h = '<a href="search.html" class="back-link">← 返回搜索</a>';
+    h += '<div class="sidebar-layout"><div>';
+    h += '<div class="card detail-header">';
+    h += '<div class="detail-avatar">' + esc(company.n.charAt(0)) + '</div>';
+    h += '<div><div class="detail-title">' + esc(company.n) + '</div>';
+    h += '<div class="detail-subtitle">';
+    if (company.c) h += '<span class="tag tag-gray">' + esc(company.c) + '</span>';
+    h += '<span class="badge badge-blue">' + company.r + ' 条评价</span>';
     h += '</div></div></div>';
     h += '<div class="compliance-note">以上评价均为用户个人观点，不代表本平台立场。本平台仅提供信息展示服务，不对评价内容的真实性、准确性负责。</div>';
     h += '<h2 style="font-size:18px;font-weight:700;margin-bottom:16px">员工评价（共 ' + reviewList.length + ' 条）</h2>';
@@ -164,7 +217,7 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
         h += '<div class="card review-card">';
         h += '<div class="review-header"><div class="review-avatar">匿</div><div>';
         h += '<div class="review-author">匿名用户</div>';
-        h += '<div class="review-meta">' + esc(r.city || company.city || '') + ' · 来源数 ' + (r.sourceCount || 1) + '</div>';
+        h += '<div class="review-meta">' + esc(r.city || company.c || '') + ' · 来源数 ' + (r.sourceCount || 1) + '</div>';
         h += '</div></div>';
         if (r.tags && r.tags.length > 0) {
           h += '<div class="review-tags">';
@@ -183,13 +236,18 @@ input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light)}
     h += '</div><div>';
     h += '<div class="sidebar-card"><div class="sidebar-title">企业申诉</div><div class="sidebar-text">如果您是该企业负责人，可对不实评价进行申诉</div><a href="complaint.html" class="btn btn-outline btn-sm" style="width:100%;display:inline-flex">发起申诉</a></div>';
     h += '<div class="sidebar-card"><div class="sidebar-title">企业信息</div>';
-    h += '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:#94a3b8">城市</span><span>' + esc(company.city || '-') + '</span></div>';
-    h += '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#94a3b8">评价数</span><span>' + company.reviewCount + ' 条</span></div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:#94a3b8">城市</span><span>' + esc(company.c || '-') + '</span></div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#94a3b8">评价数</span><span>' + company.r + ' 条</span></div>';
     h += '</div></div></div>';
     document.getElementById('companyPage').innerHTML = h;
-  }).catch(function(e){
-    document.getElementById('companyPage').innerHTML = '<div class="error-page"><h2>加载失败</h2><p>请刷新页面重试</p><a href="search.html" class="btn btn-outline">返回搜索</a></div>';
-  });
+  }
+
+  function renderNoReviews() {
+    document.getElementById('companyPage').innerHTML = document.getElementById('companyPage').innerHTML.replace(
+      '<div class="loading"><div class="spinner"></div><p>评价加载中...</p></div>',
+      '<div class="card" style="text-align:center;padding:40px"><p style="color:#94a3b8">暂无评价</p></div>'
+    );
+  }
 })();
 </script>
 </main>
