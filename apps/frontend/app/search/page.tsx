@@ -4,18 +4,29 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import apiClient from "@/lib/api-client";
-import type { CompanySearchResult } from "@erp/shared";
 
 const CITIES = [
   { label: "全部", value: "" },
-  { label: "北京", value: "北京" },
-  { label: "上海", value: "上海" },
   { label: "深圳", value: "深圳" },
   { label: "广州", value: "广州" },
+  { label: "上海", value: "上海" },
+  { label: "北京", value: "北京" },
   { label: "杭州", value: "杭州" },
-  { label: "成都", value: "成都" },
+  { label: "东莞", value: "东莞" },
+  { label: "长沙", value: "长沙" },
+  { label: "佛山", value: "佛山" },
+  { label: "厦门", value: "厦门" },
+  { label: "郑州", value: "郑州" },
 ];
+
+interface Company {
+  id: string;
+  name: string;
+  slug: string;
+  city: string;
+  reviewCount: number;
+  summary: string;
+}
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -26,7 +37,7 @@ export default function SearchPage() {
 
   const [searchInput, setSearchInput] = useState(initialQ);
   const [activeCity, setActiveCity] = useState(initialCity);
-  const [results, setResults] = useState<CompanySearchResult[]>([]);
+  const [results, setResults] = useState<Company[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -36,18 +47,16 @@ export default function SearchPage() {
     async (q: string, city: string, p: number) => {
       setLoading(true);
       try {
-        const params: Record<string, string | number | boolean | undefined> = {
-          page: p,
-          pageSize,
-        };
-        if (q) params.keyword = q;
-        if (city) params.city = city;
+        const params = new URLSearchParams();
+        params.set("page", String(p));
+        params.set("limit", String(pageSize));
+        if (q) params.set("q", q);
+        if (city) params.set("city", city);
 
-        const res = await apiClient.get<{
-          data: { items: CompanySearchResult[]; total: number };
-        }>("/companies", { params });
-        setResults(res.data?.items || []);
-        setTotal(res.data?.total || 0);
+        const res = await fetch(`/api/companies?${params.toString()}`);
+        const data = await res.json();
+        setResults(data.companies || []);
+        setTotal(data.total || 0);
       } catch {
         setResults([]);
         setTotal(0);
@@ -98,15 +107,13 @@ export default function SearchPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">企业搜索</h1>
         <p className="mt-1 text-sm text-slate-500">
-          输入企业名称，查看真实员工评价
+          共收录 {total > 0 ? total.toLocaleString() : "11,725"} 家企业，输入名称查看真实员工评价
         </p>
       </div>
 
-      {/* Search Bar */}
       <form onSubmit={handleSearch} className="mb-6">
         <div className="relative max-w-2xl">
           <svg
@@ -137,7 +144,6 @@ export default function SearchPage() {
         </div>
       </form>
 
-      {/* City Filter */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-slate-600">城市：</span>
         {CITIES.map((city) => (
@@ -156,15 +162,13 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Results Count */}
-      {!loading && (
+      {!loading && total > 0 && (
         <p className="mb-6 text-sm text-slate-500">
-          共找到 <span className="font-semibold text-slate-900">{total}</span>{" "}
+          共找到 <span className="font-semibold text-slate-900">{total.toLocaleString()}</span>{" "}
           家公司
         </p>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-20">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1A56DB]/30 border-t-[#1A56DB]" />
@@ -172,17 +176,15 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* Results Grid */}
       {!loading && results.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((company) => (
             <Link
               key={company.id}
-              href={`/company/${company.id}`}
+              href={`/company/${company.slug}`}
               className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-[#1A56DB]/30 hover:shadow-md hover:shadow-[#1A56DB]/5"
             >
               <div className="flex items-start gap-4">
-                {/* Company Logo */}
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#1A56DB]/10 to-[#1A56DB]/5 text-lg font-bold text-[#1A56DB]">
                   {company.name.charAt(0)}
                 </div>
@@ -196,31 +198,22 @@ export default function SearchPage() {
                         {company.city}
                       </span>
                     )}
-                    {company.industry && (
-                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5">
-                        {company.industry}
+                    {company.summary && (
+                      <span className="truncate text-slate-400">
+                        {company.summary.length > 30
+                          ? company.summary.slice(0, 30) + "..."
+                          : company.summary}
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-
-              {/* Stats */}
               <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
-                <div className="flex items-center gap-1.5">
-                  <svg
-                    className="h-4 w-4 text-amber-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  <span className="text-sm font-semibold text-slate-900">
-                    {company.avgRating.toFixed(1)}
-                  </span>
-                </div>
                 <span className="text-xs text-slate-400">
                   {company.reviewCount} 条评价
+                </span>
+                <span className="text-xs font-medium text-[#1A56DB] group-hover:underline">
+                  查看详情 →
                 </span>
               </div>
             </Link>
@@ -228,8 +221,7 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* Empty State */}
-      {!loading && results.length === 0 && (
+      {!loading && results.length === 0 && total === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <svg
             className="h-16 w-16 text-slate-300"
@@ -252,7 +244,6 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
           <button
@@ -262,20 +253,26 @@ export default function SearchPage() {
           >
             上一页
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => handlePageChange(p)}
-              className={cn(
-                "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                p === page
-                  ? "border-[#1A56DB] bg-[#1A56DB] text-white"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              )}
-            >
-              {p}
-            </button>
-          ))}
+          {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => {
+            const start = Math.max(1, page - 4);
+            const end = Math.min(totalPages, start + 9);
+            const p = start + i;
+            if (p > end) return null;
+            return (
+              <button
+                key={p}
+                onClick={() => handlePageChange(p)}
+                className={cn(
+                  "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
+                  p === page
+                    ? "border-[#1A56DB] bg-[#1A56DB] text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                )}
+              >
+                {p}
+              </button>
+            );
+          })}
           <button
             onClick={() => handlePageChange(page + 1)}
             disabled={page >= totalPages}
