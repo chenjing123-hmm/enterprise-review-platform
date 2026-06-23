@@ -144,12 +144,9 @@ function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;
 
 (function(){
   var base = location.pathname.replace(/reviews\.html.*$/, '');
-  // reviewFiles removed - using top_reviews.json
-  
-  var total = reviewFiles.length;
+  var allReviews = [];
 
-  
-  updateProgress();
+  loadAllReviews();
 
   function loadAllReviews() {
     fetch(base + 'data/reviews/top_reviews.json').then(function(r){return r.json()}).then(function(data){
@@ -188,8 +185,6 @@ function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;
     }
     document.getElementById('reviewsContainer').innerHTML = h;
   }
-
-  loadAllReviews();
 })();
 </script>
 </body>
