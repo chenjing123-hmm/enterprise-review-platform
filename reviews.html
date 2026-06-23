@@ -159,7 +159,7 @@ function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;
       return;
     }
     var city = reviewFiles[i];
-    fetch(base + 'data/reviews/' + encodeURIComponent(city) + '.json').then(function(r){return r.json()}).then(function(chunk){
+    fetch(base + 'data/reviews/' + encodeURIComponent(city)).then(function(r){return r.json()}).then(function(chunk){
       var keys = Object.keys(chunk);
       for (var j = 0; j < keys.length; j++) {
         var entry = chunk[keys[j]];
