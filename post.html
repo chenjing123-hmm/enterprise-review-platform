@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>免责声明 - 职得</title>
+<title>写评价 - 职得</title>
+<meta name="description" content="分享你的真实工作体验，帮助更多人看清公司">
 <style>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
 *,::before,::after{box-sizing:border-box;margin:0;padding:0}
@@ -471,19 +472,75 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
 
 <main class="container">
 <div class="page">
-  <a href="index.html" class="back-link"><svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>返回首页</a>
-  <h1 class="page-title">免责声明</h1>
-  <div class="legal-content">
-    
-<h2>一、内容免责</h2>
-<p>平台上的所有评价内容均由用户自行发布，不代表平台立场。平台不对评价内容的真实性、准确性、完整性承担任何法律责任。</p>
-<h2>二、使用风险</h2>
-<p>用户使用平台信息做出决策的，应自行承担风险。平台建议用户多方核实信息，谨慎决策。</p>
-<h2>三、链接免责</h2>
-<p>平台可能包含第三方链接，平台不对第三方网站的内容和隐私政策负责。</p>
-<h2>四、服务中断</h2>
-<p>平台可能因维护、升级或其他原因暂停服务，平台不承担由此产生的任何损失。</p>
+  <div class="page-header">
+    <h1 class="page-title">写评价</h1>
+    <p class="page-subtitle">分享你的真实工作体验，帮助更多人看清公司</p>
+  </div>
 
+  <div id="postForm" class="post-form anim-fade-up">
+    <div class="card" style="padding:32px">
+      <div class="form-group">
+        <label class="form-label">公司名称 <span style="color:var(--rust)">*</span></label>
+        <input type="text" id="companyName" placeholder="请输入公司全称" autocomplete="off">
+        <div class="form-hint">请填写准确的公司全称，方便其他人搜索到</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">所在城市 <span style="color:var(--rust)">*</span></label>
+        <select id="city">
+          <option value="">请选择城市</option>
+          <option value="上海">上海</option><option value="东莞">东莞</option><option value="佛山">佛山</option><option value="其他">其他</option><option value="其他城市">其他城市</option><option value="厦门">厦门</option><option value="宁波">宁波</option><option value="广州">广州</option><option value="杭州">杭州</option><option value="深圳">深圳</option><option value="郑州">郑州</option><option value="金华">金华</option><option value="长沙">长沙</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">评价标签（可多选）</label>
+        <div class="checkbox-group">
+          <div class="checkbox-pill"><input type="checkbox" id="t1" value="拖欠薪资"><label for="t1">拖欠薪资</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t2" value="无偿加班"><label for="t2">无偿加班</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t3" value="职场PUA"><label for="t3">职场PUA</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t4" value="套经验"><label for="t4">套经验</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t5" value="刷KPI"><label for="t5">刷KPI</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t6" value="虚标薪资"><label for="t6">虚标薪资</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t7" value="无故辞退"><label for="t7">无故辞退</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t8" value="办公环境差"><label for="t8">办公环境差</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t9" value="形式主义"><label for="t9">形式主义</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t10" value="氛围压抑"><label for="t10">氛围压抑</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t11" value="薪资福利好"><label for="t11">薪资福利好</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t12" value="工作氛围好"><label for="t12">工作氛围好</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t13" value="成长空间大"><label for="t13">成长空间大</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t14" value="管理规范"><label for="t14">管理规范</label></div>
+          <div class="checkbox-pill"><input type="checkbox" id="t15" value="加班严重"><label for="t15">加班严重</label></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">评价内容 <span style="color:var(--rust)">*</span></label>
+        <textarea id="content" placeholder="详细描述你的工作体验，包括薪资待遇、工作环境、管理风格、团队氛围等..." rows="6"></textarea>
+        <div class="form-hint">至少 20 个字，越详细越能帮助其他人</div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--ink-light)">
+          <input type="checkbox" id="anonymous" checked style="width:auto;accent-color:var(--ink)">
+          匿名发布（您的身份信息不会被公开）
+        </label>
+      </div>
+
+      <div class="compliance-note">
+        请确保评价内容真实、客观。平台不会泄露您的个人信息。发布虚假、恶意评价将被删除。
+      </div>
+
+      <button class="btn btn-accent btn-lg" style="width:100%;margin-top:16px" onclick="submitReview()">发布评价</button>
+    </div>
+  </div>
+
+  <div id="successState" class="success-state" style="display:none">
+    <div class="success-icon">&#10003;</div>
+    <div class="success-title">评价发布成功！</div>
+    <div class="success-text">感谢你的分享，你的评价将帮助更多人做出更好的职业选择。</div>
+    <a href="reviews.html" class="btn btn-accent">查看最新评价</a>
+    <button class="btn btn-outline" style="margin-left:8px" onclick="resetForm()">再写一条</button>
   </div>
 </div>
 </main>
@@ -515,5 +572,79 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
     <div class="footer-bottom">职得 · 真实员工评价平台 | 仅供信息参考</div>
   </div>
 </footer>
+
+<script>
+// Pre-fill company name from URL
+var params = new URLSearchParams(location.search);
+var prefillCompany = params.get('company');
+if (prefillCompany) {
+  document.getElementById('companyName').value = prefillCompany;
+}
+
+function submitReview() {
+  var companyName = document.getElementById('companyName').value.trim();
+  var city = document.getElementById('city').value;
+  var content = document.getElementById('content').value.trim();
+
+  if (!companyName) { showToast('请输入公司名称'); return; }
+  if (!city) { showToast('请选择所在城市'); return; }
+  if (!content || content.length < 20) { showToast('评价内容至少需要 20 个字'); return; }
+
+  // Collect tags
+  var tags = [];
+  var checkboxes = document.querySelectorAll('.checkbox-pill input:checked');
+  for (var i = 0; i < checkboxes.length; i++) {
+    tags.push(checkboxes[i].value);
+  }
+
+  // Create review object
+  var review = {
+    companyName: companyName,
+    companySlug: companyName,
+    city: city,
+    content: content,
+    tags: tags,
+    sourceCount: 1,
+    _userPost: true,
+    _timestamp: new Date().toISOString()
+  };
+
+  // Save to localStorage
+  var stored = localStorage.getItem('zde_user_reviews');
+  var reviews = [];
+  if (stored) {
+    try {
+      reviews = JSON.parse(stored);
+    } catch(e) {}
+  }
+  reviews.unshift(review);
+  localStorage.setItem('zde_user_reviews', JSON.stringify(reviews));
+
+  // Show success
+  document.getElementById('postForm').style.display = 'none';
+  document.getElementById('successState').style.display = 'block';
+}
+
+function resetForm() {
+  document.getElementById('companyName').value = '';
+  document.getElementById('city').value = '';
+  document.getElementById('content').value = '';
+  var checkboxes = document.querySelectorAll('.checkbox-pill input');
+  for (var i = 0; i < checkboxes.length; i++) checkboxes[i].checked = false;
+  document.getElementById('postForm').style.display = 'block';
+  document.getElementById('successState').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  var existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  var toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 2500);
+}
+</script>
 </body>
 </html>
