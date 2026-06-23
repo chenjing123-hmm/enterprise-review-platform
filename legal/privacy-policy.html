@@ -1221,46 +1221,46 @@ input:focus,textarea:focus,select:focus{
 </footer>
 <script>
 // Close mobile nav when a nav link is clicked
-document.querySelectorAll('.nav a').forEach(function(a) {{
-  a.addEventListener('click', function() {{
+document.querySelectorAll('.nav a').forEach(function(a) {
+  a.addEventListener('click', function() {
     document.body.classList.remove('menu-open');
-  }});
-}});
+  });
+});
 
 // Header scroll shadow
-(function(){{
+(function(){
   var header = document.querySelector('.header');
   var lastScroll = 0;
-  window.addEventListener('scroll', function(){{
+  window.addEventListener('scroll', function(){
     var scrollY = window.scrollY;
-    if (scrollY > 10) {{
+    if (scrollY > 10) {
       header.classList.add('scrolled');
-    }} else {{
+    } else {
       header.classList.remove('scrolled');
-    }}
+    }
     lastScroll = scrollY;
-  }}, {{passive: true}});
-}})();
+  }, {passive: true});
+})();
 
 // IntersectionObserver for scroll reveal
-(function(){{
+(function(){
   if (!('IntersectionObserver' in window)) return;
-  var observer = new IntersectionObserver(function(entries) {{
-    entries.forEach(function(entry) {{
-      if (entry.isIntersecting) {{
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
         entry.target.classList.add('revealed');
         observer.unobserve(entry.target);
-      }}
-    }});
-  }}, {{threshold: 0.15, rootMargin: '0px 0px -40px 0px'}});
-  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(function(el) {{
+      }
+    });
+  }, {threshold: 0.15, rootMargin: '0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(function(el) {
     observer.observe(el);
-  }});
-}})();
+  });
+})();
 
 // Button ripple effect
-(function(){{
-  document.addEventListener('click', function(e) {{
+(function(){
+  document.addEventListener('click', function(e) {
     var btn = e.target.closest('.btn');
     if (!btn) return;
     var ripple = document.createElement('span');
@@ -1271,42 +1271,42 @@ document.querySelectorAll('.nav a').forEach(function(a) {{
     ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
     ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
     btn.appendChild(ripple);
-    setTimeout(function() {{ ripple.remove(); }}, 600);
-  }});
-}})();
+    setTimeout(function() { ripple.remove(); }, 600);
+  });
+})();
 
 // Stats counter animation
-(function(){{
+(function(){
   var animated = false;
-  var observer = new IntersectionObserver(function(entries) {{
-    if (entries[0].isIntersecting && !animated) {{
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !animated) {
       animated = true;
-      document.querySelectorAll('.stat-num').forEach(function(el) {{
+      document.querySelectorAll('.stat-num').forEach(function(el) {
         el.classList.add('counting');
-        setTimeout(function() {{ el.classList.remove('counting'); }}, 400);
-      }});
-    }}
-  }}, {{threshold: 0.5}});
+        setTimeout(function() { el.classList.remove('counting'); }, 400);
+      });
+    }
+  }, {threshold: 0.5});
   var statsBar = document.querySelector('.stats-bar');
   if (statsBar) observer.observe(statsBar);
-}})();
+})();
 
 // Scroll progress bar
-(function(){{
+(function(){
   var bar = document.createElement('div');
   bar.className = 'scroll-progress';
   document.body.prepend(bar);
-  window.addEventListener('scroll', function(){{
+  window.addEventListener('scroll', function(){
     var h = document.documentElement;
     var pct = h.scrollTop / (h.scrollHeight - h.clientHeight) || 0;
     bar.style.setProperty('--scroll-pct', pct);
-  }}, {{passive: true}});
-}})();
+  }, {passive: true});
+})();
 
 // 3D card tilt on hover
-(function(){{
-  document.querySelectorAll('.card-tilt').forEach(function(card){{
-    card.addEventListener('mousemove', function(e){{
+(function(){
+  document.querySelectorAll('.card-tilt').forEach(function(card){
+    card.addEventListener('mousemove', function(e){
       var rect = card.getBoundingClientRect();
       var x = e.clientX - rect.left;
       var y = e.clientY - rect.top;
@@ -1316,25 +1316,25 @@ document.querySelectorAll('.nav a').forEach(function(a) {{
       var rotateY = (x - cx) / cx * 5;
       card.style.setProperty('--tilt-x', rotateX + 'deg');
       card.style.setProperty('--tilt-y', rotateY + 'deg');
-    }});
-    card.addEventListener('mouseleave', function(){{
+    });
+    card.addEventListener('mouseleave', function(){
       card.style.setProperty('--tilt-x', '0deg');
       card.style.setProperty('--tilt-y', '0deg');
-    }});
-  }});
-}})();
+    });
+  });
+})();
 
 // Update user review count
-(function(){{
-  try {{
+(function(){
+  try {
     var stored = localStorage.getItem('zde_user_reviews');
-    if (stored) {{
+    if (stored) {
       var reviews = JSON.parse(stored);
       var el = document.getElementById('userReviewCount');
       if (el) el.textContent = reviews.length;
-    }}
-  }} catch(e) {{}}
-}})();
+    }
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
