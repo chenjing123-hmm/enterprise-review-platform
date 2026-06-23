@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>企业搜索 - 职得</title>
-<meta name="description" content="搜索 11,725 家企业，查看真实员工评价">
+<title>页面未找到 - 职得</title>
 <style>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
 *,::before,::after{box-sizing:border-box;margin:0;padding:0}
@@ -661,7 +660,7 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
     <div class="nav-overlay" onclick="document.body.classList.remove('menu-open')"></div>
     <nav class="nav">
       <a href="index.html">首页</a>
-      <a href="search.html" class="active">企业搜索</a>
+      <a href="search.html">企业搜索</a>
       <a href="reviews.html">最新评价</a>
       <a href="complaint.html">企业申诉</a>
       <a href="post.html" class="nav-accent">写评价</a>
@@ -671,25 +670,15 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
 
 <main class="container">
 <div class="page">
-  <div class="page-header">
-    <h1 class="page-title">企业搜索</h1>
-    <p class="page-subtitle">共收录 <strong>11,725</strong> 家企业</p>
+  <div class="error-page" style="padding:100px 20px">
+    <div style="font-family:var(--font-serif);font-size:72px;font-weight:900;color:var(--amber);opacity:.3;margin-bottom:16px">404</div>
+    <h2>页面未找到</h2>
+    <p>您访问的页面不存在或已被移除</p>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:24px">
+      <a href="index.html" class="btn btn-accent">返回首页</a>
+      <a href="search.html" class="btn btn-outline">搜索企业</a>
+    </div>
   </div>
-
-  <form class="search-box" style="margin-bottom:20px" onsubmit="doSearch();return false">
-    <input type="text" id="searchInput" placeholder="输入企业名称，查看真实评价..." autocomplete="off">
-    <button type="submit" class="btn btn-accent">搜索</button>
-  </form>
-
-  <div class="city-filter">
-    <a href="javascript:void(0)" class="city-btn active" onclick="filterCity('')">全部</a>
-    <a href="javascript:void(0)" class="city-btn" data-city="上海" onclick="filterCity('上海')">上海</a><a href="javascript:void(0)" class="city-btn" data-city="东莞" onclick="filterCity('东莞')">东莞</a><a href="javascript:void(0)" class="city-btn" data-city="佛山" onclick="filterCity('佛山')">佛山</a><a href="javascript:void(0)" class="city-btn" data-city="其他" onclick="filterCity('其他')">其他</a><a href="javascript:void(0)" class="city-btn" data-city="其他城市" onclick="filterCity('其他城市')">其他城市</a><a href="javascript:void(0)" class="city-btn" data-city="厦门" onclick="filterCity('厦门')">厦门</a><a href="javascript:void(0)" class="city-btn" data-city="宁波" onclick="filterCity('宁波')">宁波</a><a href="javascript:void(0)" class="city-btn" data-city="广州" onclick="filterCity('广州')">广州</a><a href="javascript:void(0)" class="city-btn" data-city="杭州" onclick="filterCity('杭州')">杭州</a><a href="javascript:void(0)" class="city-btn" data-city="深圳" onclick="filterCity('深圳')">深圳</a><a href="javascript:void(0)" class="city-btn" data-city="郑州" onclick="filterCity('郑州')">郑州</a><a href="javascript:void(0)" class="city-btn" data-city="金华" onclick="filterCity('金华')">金华</a><a href="javascript:void(0)" class="city-btn" data-city="长沙" onclick="filterCity('长沙')">长沙</a>
-  </div>
-
-  <p class="result-count" id="resultInfo"></p>
-  <div class="company-grid" id="results"></div>
-  <div class="pagination" id="pagination" style="display:none"></div>
-  <div id="loadingMsg" class="loading" style="display:none"><div class="spinner"></div><p>搜索中...</p></div>
 </div>
 </main>
 
@@ -727,150 +716,6 @@ document.querySelectorAll('.nav a').forEach(function(a) {{
     document.body.classList.remove('menu-open');
   }});
 }});
-</script>
-
-<script>
-var SEARCH_INDEX = [];
-var SEARCH_LOADED = false;
-var PAGE_SIZE = 20;
-var currentPage = 1;
-var currentResults = [];
-
-function loadSearchIndex() {
-  if (SEARCH_LOADED) return Promise.resolve(SEARCH_INDEX);
-  document.getElementById('loadingMsg').style.display = 'block';
-  return fetch('data/search-index.json').then(function(r){return r.json()}).then(function(data){
-    SEARCH_INDEX = data;
-    SEARCH_LOADED = true;
-    document.getElementById('loadingMsg').style.display = 'none';
-    return data;
-  }).catch(function(){
-    document.getElementById('loadingMsg').innerHTML = '<div class="empty"><h3>数据加载失败</h3><p>请刷新页面重试</p></div>';
-    return [];
-  });
-}
-
-function esc(s) { if(!s)return''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function getParams() {
-  var p = new URLSearchParams(location.search);
-  return { q: p.get('q') || '', city: p.get('city') || '' };
-}
-
-function filterCity(city) {
-  var p = getParams();
-  var q = p.q;
-  var url = 'search.html?';
-  if (q) url += 'q=' + encodeURIComponent(q) + '&';
-  if (city) url += 'city=' + encodeURIComponent(city);
-  history.pushState(null, '', url);
-  loadSearchIndex().then(doSearch);
-}
-
-function doSearch() {
-  var input = document.getElementById('searchInput');
-  var q = input.value.trim();
-  var p = getParams();
-  q = q || p.q;
-  var city = p.city;
-
-  var url = 'search.html?';
-  if (q) url += 'q=' + encodeURIComponent(q) + '&';
-  if (city) url += 'city=' + encodeURIComponent(city);
-  history.pushState(null, '', url);
-
-  // Update city filter active state
-  var btns = document.querySelectorAll('.city-btn');
-  for (var i = 0; i < btns.length; i++) {
-    var dc = btns[i].getAttribute('data-city') || '';
-    if (dc === city || (!city && !dc)) {
-      btns[i].classList.add('active');
-    } else {
-      btns[i].classList.remove('active');
-    }
-  }
-
-  if (!q && !city) {
-    document.getElementById('resultInfo').textContent = '';
-    document.getElementById('results').innerHTML = '<div class="empty"><h3>输入关键词搜索</h3><p>输入企业名称或选择城市，浏览真实员工评价</p></div>';
-    document.getElementById('pagination').style.display = 'none';
-    return;
-  }
-
-  var ql = q.toLowerCase();
-  var results = [];
-  for (var i = 0; i < SEARCH_INDEX.length; i++) {
-    var c = SEARCH_INDEX[i];
-    if (city && c.c !== city) continue;
-    if (q && c.n.toLowerCase().indexOf(ql) === -1 && c.s.toLowerCase().indexOf(ql) === -1) continue;
-    results.push(c);
-  }
-
-  currentResults = results;
-  currentPage = 1;
-  renderResults();
-}
-
-function renderResults() {
-  var total = currentResults.length;
-  document.getElementById('resultInfo').innerHTML = total > 0 ? '共找到 <strong>' + total.toLocaleString() + '</strong> 家公司' : '未找到匹配的企业';
-
-  var start = (currentPage - 1) * PAGE_SIZE;
-  var end = Math.min(start + PAGE_SIZE, total);
-  var pageItems = currentResults.slice(start, end);
-
-  var h = '';
-  for (var i = 0; i < pageItems.length; i++) {
-    var c = pageItems[i];
-    h += '<a href="company.html?slug=' + encodeURIComponent(c.s) + '" class="card company-card card-hover">';
-    h += '<div class="company-card-header">';
-    h += '<div class="company-avatar">' + esc(c.n.charAt(0)) + '</div>';
-    h += '<div>';
-    h += '<div class="company-name">' + esc(c.n) + '</div>';
-    h += '<div class="company-meta">';
-    if (c.c) h += '<span class="tag tag-neutral">' + esc(c.c) + '</span>';
-    h += '</div></div></div>';
-    h += '<div class="company-stats">';
-    h += '<span class="company-review-count">' + c.r + ' 条评价</span>';
-    h += '<span class="company-arrow">查看详情 →</span>';
-    h += '</div></a>';
-  }
-  document.getElementById('results').innerHTML = h;
-
-  // Pagination
-  var totalPages = Math.ceil(total / PAGE_SIZE);
-  var ph = '';
-  if (totalPages > 1) {
-    ph += '<a href="javascript:void(0)" class="' + (currentPage === 1 ? 'disabled' : '') + '" onclick="goPage(' + (currentPage - 1) + ')">上一页</a>';
-    for (var p = 1; p <= totalPages; p++) {
-      if (p === 1 || p === totalPages || (p >= currentPage - 2 && p <= currentPage + 2)) {
-        ph += '<a href="javascript:void(0)" class="' + (p === currentPage ? 'active' : '') + '" onclick="goPage(' + p + ')">' + p + '</a>';
-      } else if (p === currentPage - 3 || p === currentPage + 3) {
-        ph += '<span class="disabled">...</span>';
-      }
-    }
-    ph += '<a href="javascript:void(0)" class="' + (currentPage === totalPages ? 'disabled' : '') + '" onclick="goPage(' + (currentPage + 1) + ')">下一页</a>';
-  }
-  document.getElementById('pagination').innerHTML = ph;
-  document.getElementById('pagination').style.display = totalPages > 1 ? 'flex' : 'none';
-}
-
-function goPage(p) {
-  var totalPages = Math.ceil(currentResults.length / PAGE_SIZE);
-  if (p < 1 || p > totalPages) return;
-  currentPage = p;
-  renderResults();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Init
-var params = getParams();
-if (params.q) {
-  document.getElementById('searchInput').value = params.q;
-}
-loadSearchIndex().then(function() {
-  doSearch();
-});
 </script>
 </body>
 </html>
