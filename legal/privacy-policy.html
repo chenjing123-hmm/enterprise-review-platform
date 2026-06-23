@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>隐私政策 - 职得</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
 
 *,::before,::after{box-sizing:border-box;margin:0;padding:0}
@@ -686,9 +688,6 @@ input:focus,textarea:focus,select:focus{
 }
 
 /* ===== MOBILE OPTIMIZATIONS ===== */
-@media(prefers-reduced-motion:reduce){
-  *,::before,::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-}
 
 /* Loading skeleton */
 .skeleton{background:linear-gradient(90deg,var(--cream-dark) 25%,var(--border-light) 50%,var(--cream-dark) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm)}
@@ -1125,6 +1124,91 @@ input:focus,textarea:focus,select:focus{
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink-muted)}
+
+/* ===== BACK TO TOP BUTTON ===== */
+.back-to-top{
+  position:fixed;bottom:28px;right:28px;z-index:150;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--ink);color:#fff;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(26,26,26,.2);
+  opacity:0;transform:translateY(16px);pointer-events:none;
+  transition:opacity .3s,transform .3s;
+}
+.back-to-top.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+.back-to-top:hover{background:var(--amber);transform:translateY(-2px);box-shadow:0 6px 20px rgba(212,146,58,.3)}
+.back-to-top svg{width:18px;height:18px;transition:transform .3s}
+.back-to-top:hover svg{transform:translateY(-2px)}
+.back-to-top-progress{
+  position:absolute;inset:-3px;border-radius:50%;
+  background:conic-gradient(var(--amber) var(--btp-pct,0%),transparent var(--btp-pct,0%));
+  -webkit-mask:radial-gradient(transparent 58%,#000 60%);mask:radial-gradient(transparent 58%,#000 60%);
+}
+
+/* ===== NUMBER COUNTER ===== */
+@keyframes countNumber{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.stat-num.counting{animation:countNumber .6s cubic-bezier(.25,.46,.45,.94) both}
+
+/* ===== PARALLAX HERO ===== */
+.hero-parallax{will-change:transform}
+
+/* ===== FOCUS VISIBLE ===== */
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:2px}
+.btn:focus-visible,.nav a:focus-visible{outline-offset:0}
+
+/* ===== SKELETON LOADING ===== */
+.skeleton-card{
+  background:var(--paper);border-radius:var(--radius-lg);
+  border:1px solid var(--border);padding:24px;
+  overflow:hidden;
+  position:relative;
+}
+.skeleton-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.5) 50%,transparent 100%);
+  animation:shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(100%)}
+}
+.skeleton-line{
+  height:14px;background:var(--cream-dark);border-radius:7px;
+  margin-bottom:10px;
+}
+.skeleton-line:last-child{margin-bottom:0;width:60%}
+.skeleton-line-sm{height:10px;width:40%}
+.skeleton-avatar{
+  width:44px;height:44px;background:var(--cream-dark);border-radius:var(--radius);
+  flex-shrink:0;
+}
+.skeleton-header{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.skeleton-body{margin-left:0}
+
+/* ===== PRINT STYLES ===== */
+@media print{
+  .header,.footer,.banner,.nav,.back-to-top,.scroll-progress,.hero-particles,.bg-grid,.hero-float-1,.hero-float-2,.hero-float-3,.hero-float-4,.hero-float-5,.menu-toggle,.nav-overlay{display:none!important}
+  body{background:#fff!important;color:#000!important;font-size:12pt}
+  .card,.review-card{border:1px solid #ddd;box-shadow:none;break-inside:avoid}
+  .container{max-width:100%;padding:0}
+  .hero{padding:20px 0;text-align:left}
+  .page-title{font-size:18pt}
+  a{color:#000;text-decoration:underline}
+}
+
+/* ===== REDUCED MOTION PREFERENCE ===== */
+@media(prefers-reduced-motion:reduce){
+  *,::before,::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* ===== PERFORMANCE HINTS ===== */
+.card-tilt{will-change:transform}
+.reveal,.reveal-left,.reveal-right,.reveal-scale{will-change:transform,opacity}
+.hero-float-1,.hero-float-2,.hero-float-3,.hero-float-4,.hero-float-5{will-change:transform}
+.company-grid{contain:layout style}
 </style>
 </head>
 <body>
@@ -1335,6 +1419,76 @@ document.querySelectorAll('.nav a').forEach(function(a) {
     }
   } catch(e) {}
 })();
-</script>
+
+// Back to top button with scroll progress
+(function(){
+  var btn = document.createElement('button');
+  btn.className = 'back-to-top';
+  btn.setAttribute('aria-label', '返回顶部');
+  btn.innerHTML = '<span class="back-to-top-progress"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>';
+  document.body.appendChild(btn);
+  btn.addEventListener('click', function(){
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  });
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (!ticking) {
+      requestAnimationFrame(function(){
+        var scrollY = window.scrollY;
+        var docH = document.documentElement;
+        var totalH = docH.scrollHeight - docH.clientHeight;
+        var pct = totalH > 0 ? Math.min(scrollY / totalH * 100, 100) : 0;
+        if (scrollY > 400) {
+          btn.classList.add('visible');
+        } else {
+          btn.classList.remove('visible');
+        }
+        btn.style.setProperty('--btp-pct', pct + '%');
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, {passive: true});
+})();
+
+// Animated number counter
+(function(){
+  if (!('IntersectionObserver' in window)) return;
+  var counters = document.querySelectorAll('.stat-num[data-count]');
+  if (!counters.length) return;
+  var animated = {};
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting && !animated[entry.target.id || entry.target.textContent]) {
+        var el = entry.target;
+        animated[el.id || el.textContent] = true;
+        var target = parseInt(el.getAttribute('data-count'));
+        var duration = 1500;
+        var startTime = null;
+        function animate(ts){
+          if (!startTime) startTime = ts;
+          var progress = Math.min((ts - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.floor(eased * target).toLocaleString();
+          if (progress < 1) requestAnimationFrame(animate);
+          else el.textContent = target.toLocaleString();
+        }
+        requestAnimationFrame(animate);
+      }
+    });
+  }, {threshold: 0.3});
+  counters.forEach(function(c){ observer.observe(c); });
+})();
+
+// Keyboard shortcut: press / to focus search
+(function(){
+  document.addEventListener('keydown', function(e){
+    if (e.key === '/' && !e.target.closest('input,textarea,select,[contenteditable]')) {
+      e.preventDefault();
+      var searchInput = document.getElementById('heroSearch') || document.getElementById('searchInput');
+      if (searchInput) searchInput.focus();
+    }
+  });
+})();</script>
 </body>
 </html>
