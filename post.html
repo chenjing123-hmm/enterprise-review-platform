@@ -195,21 +195,335 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
 }
 .page-subtitle{font-size:15px;color:var(--ink-muted)}
 
-/* Animations */
+/* ===== ANIMATIONS ===== */
+
+/* Keyframes */
 @keyframes fadeInUp{
-  from{opacity:0;transform:translateY(16px)}
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes fadeInDown{
+  from{opacity:0;transform:translateY(-24px)}
   to{opacity:1;transform:translateY(0)}
 }
 @keyframes fadeIn{
   from{opacity:0}
   to{opacity:1}
 }
-.anim-fade-in{animation:fadeIn .5s ease-out}
+@keyframes fadeInScale{
+  from{opacity:0;transform:scale(.92)}
+  to{opacity:1;transform:scale(1)}
+}
+@keyframes slideInLeft{
+  from{opacity:0;transform:translateX(-30px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes slideInRight{
+  from{opacity:0;transform:translateX(30px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+@keyframes floatSlow{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  33%{transform:translateY(-8px) rotate(1deg)}
+  66%{transform:translateY(4px) rotate(-1deg)}
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.05)}
+}
+@keyframes logoShine{
+  0%{left:-100%}
+  50%{left:100%}
+  100%{left:100%}
+}
+@keyframes ripple{
+  to{transform:scale(4);opacity:0}
+}
+@keyframes bounceIn{
+  0%{transform:scale(.3);opacity:0}
+  50%{transform:scale(1.05)}
+  70%{transform:scale(.95)}
+  100%{transform:scale(1);opacity:1}
+}
+@keyframes drawLine{
+  to{stroke-dashoffset:0}
+}
+@keyframes countUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes borderGlow{
+  0%,100%{border-color:var(--border)}
+  50%{border-color:var(--amber)}
+}
+@keyframes shakeX{
+  0%,100%{transform:translateX(0)}
+  10%,30%,50%,70%,90%{transform:translateX(-3px)}
+  20%,40%,60%,80%{transform:translateX(3px)}
+}
+@keyframes gradientShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* Entrance classes */
+.anim-fade-in{animation:fadeIn .6s ease-out}
 .anim-fade-up{animation:fadeInUp .6s ease-out}
+.anim-fade-down{animation:fadeInDown .6s ease-out}
+.anim-fade-scale{animation:fadeInScale .5s ease-out}
+.anim-slide-left{animation:slideInLeft .5s ease-out}
+.anim-slide-right{animation:slideInRight .5s ease-out}
+.anim-bounce{animation:bounceIn .5s cubic-bezier(.68,-.55,.265,1.55)}
+.anim-float{animation:float 4s ease-in-out infinite}
+.anim-float-slow{animation:floatSlow 6s ease-in-out infinite}
+.anim-pulse{animation:pulse 2s ease-in-out infinite}
+.anim-shake{animation:shakeX .5s ease-in-out}
+
+/* Delay utilities */
 .anim-delay-1{animation-delay:.1s;animation-fill-mode:both}
 .anim-delay-2{animation-delay:.2s;animation-fill-mode:both}
 .anim-delay-3{animation-delay:.3s;animation-fill-mode:both}
 .anim-delay-4{animation-delay:.4s;animation-fill-mode:both}
+.anim-delay-5{animation-delay:.5s;animation-fill-mode:both}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal{
+  opacity:0;transform:translateY(30px);
+  transition:opacity .7s cubic-bezier(.25,.46,.45,.94),transform .7s cubic-bezier(.25,.46,.45,.94);
+}
+.reveal.revealed{opacity:1;transform:translateY(0)}
+.reveal-left{
+  opacity:0;transform:translateX(-40px);
+  transition:opacity .7s cubic-bezier(.25,.46,.45,.94),transform .7s cubic-bezier(.25,.46,.45,.94);
+}
+.reveal-left.revealed{opacity:1;transform:translateX(0)}
+.reveal-right{
+  opacity:0;transform:translateX(40px);
+  transition:opacity .7s cubic-bezier(.25,.46,.45,.94),transform .7s cubic-bezier(.25,.46,.45,.94);
+}
+.reveal-right.revealed{opacity:1;transform:translateX(0)}
+.reveal-scale{
+  opacity:0;transform:scale(.9);
+  transition:opacity .6s cubic-bezier(.25,.46,.45,.94),transform .6s cubic-bezier(.25,.46,.45,.94);
+}
+.reveal-scale.revealed{opacity:1;transform:scale(1)}
+.delay-1{transition-delay:.1s}
+.delay-2{transition-delay:.2s}
+.delay-3{transition-delay:.3s}
+.delay-4{transition-delay:.4s}
+.delay-5{transition-delay:.5s}
+
+/* ===== HERO DECORATIVE FLOATS ===== */
+.hero-float-1{
+  position:absolute;width:120px;height:120px;
+  background:radial-gradient(circle,rgba(212,146,58,.08) 0%,transparent 70%);
+  border-radius:50%;top:15%;left:8%;pointer-events:none;
+  animation:float 8s ease-in-out infinite;
+}
+.hero-float-2{
+  position:absolute;width:80px;height:80px;
+  background:radial-gradient(circle,rgba(212,146,58,.06) 0%,transparent 70%);
+  border-radius:50%;top:60%;right:10%;pointer-events:none;
+  animation:float 6s ease-in-out infinite 1s;
+}
+.hero-float-3{
+  position:absolute;width:60px;height:60px;
+  background:radial-gradient(circle,rgba(91,140,90,.06) 0%,transparent 70%);
+  border-radius:50%;bottom:20%;left:20%;pointer-events:none;
+  animation:float 7s ease-in-out infinite 2s;
+}
+.hero-float-4{
+  position:absolute;width:40px;height:40px;
+  background:radial-gradient(circle,rgba(192,57,43,.05) 0%,transparent 70%);
+  border-radius:50%;top:25%;right:25%;pointer-events:none;
+  animation:float 5s ease-in-out infinite 1.5s;
+}
+.hero-float-5{
+  position:absolute;width:100px;height:100px;
+  border:1px solid rgba(212,146,58,.08);
+  border-radius:50%;top:70%;left:55%;pointer-events:none;
+  animation:floatSlow 9s ease-in-out infinite;
+}
+
+/* ===== LOGO SHINE ===== */
+.logo-mark{
+  position:relative;overflow:hidden;
+}
+.logo-mark::after{
+  content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  transform:skewX(-25deg);animation:logoShine 4s ease-in-out infinite;
+}
+
+/* ===== NAV LINK UNDERLINE ===== */
+.nav a{position:relative}
+.nav a::after{
+  content:'';position:absolute;bottom:6px;left:50%;width:0;height:2px;
+  background:var(--amber);border-radius:1px;
+  transition:all .3s cubic-bezier(.25,.46,.45,.94);
+  transform:translateX(-50%);
+}
+.nav a:hover::after,.nav a.active::after{width:60%}
+.nav a.nav-accent::after{display:none}
+
+/* ===== BUTTON RIPPLE ===== */
+.btn{
+  position:relative;overflow:hidden;
+}
+.btn .ripple-effect{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.35);
+  transform:scale(0);animation:ripple .6s ease-out;
+  pointer-events:none;
+}
+
+/* ===== CARD ENHANCED HOVER ===== */
+.card-hover{
+  transition:transform .3s cubic-bezier(.25,.46,.45,.94),
+             box-shadow .3s cubic-bezier(.25,.46,.45,.94),
+             border-color .3s ease;
+}
+.card-hover:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 30px rgba(26,26,26,.08);
+  border-color:var(--amber);
+}
+
+/* ===== COMPANY CARD AVATAR HOVER ===== */
+.company-card:hover .company-avatar{
+  animation:bounceIn .4s ease-out;
+}
+
+/* ===== REVIEW CARD QUOTE ANIMATION ===== */
+.review-card{transition:transform .3s ease,box-shadow .3s ease}
+.review-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(26,26,26,.06);
+}
+.review-card .review-body::before{
+  display:inline-block;transition:transform .3s ease,opacity .3s ease;
+}
+.review-card:hover .review-body::before{
+  transform:scale(1.2);opacity:.6;
+}
+
+/* ===== TAG PILL ACTIVE BOUNCE ===== */
+.checkbox-pill input:checked+label{
+  animation:bounceIn .35s ease-out;
+}
+
+/* ===== CITY BUTTON BOUNCE ===== */
+.city-btn.active{
+  animation:bounceIn .3s ease-out;
+}
+
+/* ===== TOAST SLIDE ===== */
+.toast{
+  animation:slideInRight .3s ease-out;
+}
+.toast-hiding{
+  animation:fadeInDown .25s ease-in reverse;
+  animation-fill-mode:forwards;
+}
+
+/* ===== COMPANY GRID STAGGER ===== */
+.company-grid .company-card{
+  opacity:0;animation:fadeInUp .5s ease-out forwards;
+}
+.company-grid .company-card:nth-child(1){animation-delay:0s}
+.company-grid .company-card:nth-child(2){animation-delay:.05s}
+.company-grid .company-card:nth-child(3){animation-delay:.1s}
+.company-grid .company-card:nth-child(4){animation-delay:.15s}
+.company-grid .company-card:nth-child(5){animation-delay:.2s}
+.company-grid .company-card:nth-child(6){animation-delay:.25s}
+.company-grid .company-card:nth-child(7){animation-delay:.3s}
+.company-grid .company-card:nth-child(8){animation-delay:.35s}
+.company-grid .company-card:nth-child(9){animation-delay:.4s}
+.company-grid .company-card:nth-child(10){animation-delay:.45s}
+.company-grid .company-card:nth-child(n+11){animation-delay:.5s}
+
+/* ===== STATS COUNTER ===== */
+.stat-num.counting{
+  animation:countUp .4s ease-out;
+}
+
+/* ===== PAGE TITLE DECORATION ===== */
+.page-title{
+  position:relative;display:inline-block;
+}
+.page-title::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:40px;height:3px;
+  background:var(--amber);border-radius:2px;
+  animation:slideInLeft .8s ease-out .3s both;
+}
+
+/* ===== SECTION TITLE DECORATION ===== */
+.section-title{
+  position:relative;display:inline-block;
+}
+.section-title::after{
+  content:'';position:absolute;bottom:-6px;left:0;width:32px;height:3px;
+  background:var(--amber);border-radius:2px;
+  opacity:0;transform:scaleX(0);transform-origin:left;
+  transition:opacity .3s,transform .5s cubic-bezier(.25,.46,.45,.94);
+}
+.section-title.revealed::after{opacity:1;transform:scaleX(1)}
+
+/* ===== HEADER SCROLL SHADOW ===== */
+.header.scrolled{
+  box-shadow:0 2px 20px rgba(26,26,26,.08);
+}
+
+/* ===== SUCCESS STATE ===== */
+.success-icon{
+  animation:bounceIn .6s ease-out;
+}
+.success-state .success-title{
+  animation:fadeInUp .5s ease-out .2s both;
+}
+.success-state .success-text{
+  animation:fadeInUp .5s ease-out .3s both;
+}
+.success-state .btn{
+  animation:fadeInUp .5s ease-out .4s both;
+}
+
+/* ===== BACK LINK HOVER ARROW ===== */
+.back-link svg{transition:transform .3s ease}
+.back-link:hover svg{transform:translateX(-3px)}
+
+/* ===== PAGINATION HOVER ===== */
+.pagination a,.pagination span{
+  transition:all .3s cubic-bezier(.25,.46,.45,.94);
+}
+.pagination a:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(26,26,26,.08);
+}
+
+/* ===== FORM INPUT FOCUS ===== */
+input:focus,textarea:focus,select:focus{
+  animation:borderGlow 2s ease-in-out infinite;
+}
+
+/* ===== FOOTER LINK HOVER ARROW ===== */
+.footer-links a{
+  position:relative;padding-left:0;transition:padding-left .3s ease,color .3s ease;
+}
+.footer-links a:hover{padding-left:6px}
+
+/* ===== BANNER ===== */
+.banner{
+  animation:fadeInDown .5s ease-out;
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-icon{animation:float 3s ease-in-out infinite}
 
 /* Loading skeleton */
 .skeleton{background:linear-gradient(90deg,var(--cream-dark) 25%,var(--border-light) 50%,var(--cream-dark) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-sm)}
@@ -673,11 +987,11 @@ textarea{resize:vertical;min-height:120px;line-height:1.7}
 <div class="page">
   <div class="page-header">
     <h1 class="page-title">写评价</h1>
-    <p class="page-subtitle">分享你的真实工作体验，帮助更多人看清公司</p>
+    <p class="page-subtitle reveal">分享你的真实工作体验，帮助更多人看清公司</p>
   </div>
 
-  <div id="postForm" class="post-form anim-fade-up">
-    <div class="card" style="padding:32px">
+  <div id="postForm" class="post-form anim-fade-scale">
+    <div class="card reveal delay-1" style="padding:32px">
       <div class="form-group">
         <label class="form-label">公司名称 <span style="color:var(--rust)">*</span></label>
         <input type="text" id="companyName" placeholder="请输入公司全称" autocomplete="off">
@@ -778,6 +1092,70 @@ document.querySelectorAll('.nav a').forEach(function(a) {{
     document.body.classList.remove('menu-open');
   }});
 }});
+
+// Header scroll shadow
+(function(){{
+  var header = document.querySelector('.header');
+  var lastScroll = 0;
+  window.addEventListener('scroll', function(){{
+    var scrollY = window.scrollY;
+    if (scrollY > 10) {{
+      header.classList.add('scrolled');
+    }} else {{
+      header.classList.remove('scrolled');
+    }}
+    lastScroll = scrollY;
+  }}, {{passive: true}});
+}})();
+
+// IntersectionObserver for scroll reveal
+(function(){{
+  if (!('IntersectionObserver' in window)) return;
+  var observer = new IntersectionObserver(function(entries) {{
+    entries.forEach(function(entry) {{
+      if (entry.isIntersecting) {{
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }}
+    }});
+  }}, {{threshold: 0.15, rootMargin: '0px 0px -40px 0px'}});
+  document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(function(el) {{
+    observer.observe(el);
+  }});
+}})();
+
+// Button ripple effect
+(function(){{
+  document.addEventListener('click', function(e) {{
+    var btn = e.target.closest('.btn');
+    if (!btn) return;
+    var ripple = document.createElement('span');
+    ripple.className = 'ripple-effect';
+    var rect = btn.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(function() {{ ripple.remove(); }}, 600);
+  }});
+}})();
+
+// Stats counter animation
+(function(){{
+  var animated = false;
+  var observer = new IntersectionObserver(function(entries) {{
+    if (entries[0].isIntersecting && !animated) {{
+      animated = true;
+      document.querySelectorAll('.stat-num').forEach(function(el) {{
+        el.classList.add('counting');
+        setTimeout(function() {{ el.classList.remove('counting'); }}, 400);
+      }});
+    }}
+  }}, {{threshold: 0.5}});
+  var statsBar = document.querySelector('.stats-bar');
+  if (statsBar) observer.observe(statsBar);
+}})();
 </script>
 
 <script>
